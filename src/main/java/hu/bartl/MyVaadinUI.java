@@ -129,9 +129,6 @@ public class MyVaadinUI extends UI {
 
 				if (MyVaadinUI.this.user != null
 						&& event.getProperty().getValue() != null) {
-					System.out.println(event);
-					System.out.println(event.getProperty());
-					System.out.println(event.getProperty().getValue());
 					String selectedUserName = event.getProperty().getValue() // TODO:
 																				// getValue
 																				// sometimes

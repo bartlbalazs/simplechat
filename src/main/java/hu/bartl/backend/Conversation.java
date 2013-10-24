@@ -63,7 +63,6 @@ public class Conversation {
 	public void addMessage(Message message) {
 		if (message != null) {
 			this.messages.add(message);
-			System.out.println(message);
 			for (Entry<User, ConversationPanel> panelEntry : conversationPanels
 					.entrySet()) {
 				ConversationPanel panel = panelEntry.getValue();
