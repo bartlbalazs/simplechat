@@ -2,6 +2,7 @@ package hu.bartl.backend;
 
 import hu.bartl.MyVaadinUI.UiCloseEvent;
 import hu.bartl.MyVaadinUI.UiCloseListener;
+import hu.bartl.model.User;
 
 import java.io.Serializable;
 import java.util.ArrayList;

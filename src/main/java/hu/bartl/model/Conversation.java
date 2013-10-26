@@ -1,4 +1,4 @@
-package hu.bartl.backend;
+package hu.bartl.model;
 
 import hu.bartl.widgets.ConversationPanel;
 

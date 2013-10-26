@@ -1,4 +1,4 @@
-package hu.bartl.backend;
+package hu.bartl.model;
 
 import com.google.common.base.Strings;
 
