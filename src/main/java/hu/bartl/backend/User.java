@@ -113,9 +113,7 @@ public class User implements UiCloseListener {
 			}
 		}
 
-		for (ConversationListChangedEventHandler handler : conversationListChangedEventHandlers) {
-			handler = null;
-		}
+		conversationListChangedEventHandlers.clear();
 	}
 
 	private void fireConversationLisChangedEvent(

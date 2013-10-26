@@ -59,9 +59,7 @@ public class Conversation {
 		user1 = null;
 		user2 = null;
 
-		for (MessageAddingListener listener : listeners) {
-			listener = null;
-		}
+		listeners.clear();
 	}
 
 	public void addMessage(Message message) {
