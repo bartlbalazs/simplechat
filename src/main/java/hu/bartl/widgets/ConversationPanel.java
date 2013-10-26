@@ -10,43 +10,51 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-public class ConversationPanel extends VerticalLayout {
+public class ConversationPanel extends Panel {
 
 	private static final long serialVersionUID = 7912609064753661825L;
 
-	private final Panel messagePanel = new Panel();
-	private final VerticalLayout messageLayout = new VerticalLayout();
+	private final int CONTENT_WIDTH_PX = 600;
 
+	private final VerticalLayout mainLayout = new VerticalLayout();
+	private final VerticalLayout messageLayout = new VerticalLayout();
 	private final HorizontalLayout inputLayout = new HorizontalLayout();
 
 	private final Button sendButton = new Button("Küldés");
-
 	private final TextField inputField = new TextField();
 
 	private ConversationPanel() {
-		setMargin(true);
-		this.addComponent(messagePanel);
-		messagePanel.setWidth(600, Unit.PIXELS);
+		build();
+	}
 
-		messagePanel.setContent(messageLayout);
-		messageLayout.setSizeFull();
-		this.setExpandRatio(messagePanel, 1);
+	private void build() {
+		buildMessageLayout();
+		buildInputField();
+		buildSendButton();
+		buildInputLayout();
+		buildMainLayout();
+	}
 
-		inputLayout.setWidth(600, Unit.PIXELS);
+	private void buildMainLayout() {
+		mainLayout.setMargin(true);
+		mainLayout.addComponent(messageLayout);
+		mainLayout.setExpandRatio(messageLayout, 1);
+		mainLayout.addComponent(inputLayout);
+		mainLayout.setSizeFull();
 
-		inputField.setHeight(25, Unit.PIXELS);
-		inputField.setWidth(100, Unit.PERCENTAGE);
-		inputField.setBuffered(true);
+		setContent(mainLayout);
+	}
+
+	private void buildInputLayout() {
+		inputLayout.setWidth(CONTENT_WIDTH_PX, Unit.PIXELS);
+		inputLayout.addComponent(sendButton);
 		inputLayout.addComponent(inputField);
+		inputLayout.setExpandRatio(inputField, 1);
+	}
 
+	private void buildSendButton() {
 		sendButton.setWidth(75, Unit.PIXELS);
 		sendButton.setHeight(25, Unit.PIXELS);
-		inputLayout.addComponent(sendButton);
-		inputLayout.setExpandRatio(inputField, 1);
-
-		this.addComponent(inputLayout);
-		this.setSizeFull();
-
 		sendButton.addClickListener(new Button.ClickListener() {
 
 			private static final long serialVersionUID = 5558384915453382904L;
@@ -58,6 +66,16 @@ public class ConversationPanel extends VerticalLayout {
 			}
 		});
 		sendButton.setClickShortcut(KeyCode.ENTER);
+	}
+
+	private void buildInputField() {
+		inputField.setHeight(25, Unit.PIXELS);
+		inputField.setWidth(100, Unit.PERCENTAGE);
+		inputField.setBuffered(true);
+	}
+
+	private void buildMessageLayout() {
+		messageLayout.setWidth(CONTENT_WIDTH_PX, Unit.PIXELS);
 	}
 
 	public static ConversationPanel create() {
