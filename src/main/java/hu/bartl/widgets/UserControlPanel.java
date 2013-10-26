@@ -28,7 +28,7 @@ public class UserControlPanel extends VerticalLayout {
 		return new UserControlPanel();
 	}
 
-	public UserControlPanel() {
+	private UserControlPanel() {
 		build();
 	}
 

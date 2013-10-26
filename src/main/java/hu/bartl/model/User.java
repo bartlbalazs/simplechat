@@ -168,6 +168,22 @@ public class User implements UiCloseListener {
 		return conversationContainer;
 	}
 
+	public Conversation getConversationByName(String conversationName) {
+		if (Strings.isNullOrEmpty(conversationName)) {
+			return null;
+		}
+
+		Item conversationItem = this.getConversationContainer().getItem(
+				conversationName);
+
+		if (conversationItem == null) {
+			return null;
+		}
+
+		return (Conversation) conversationItem.getItemProperty("conversation")
+				.getValue();
+	}
+
 	@Override
 	public void onUiClose(UiCloseEvent event) {
 		clearReferences();
