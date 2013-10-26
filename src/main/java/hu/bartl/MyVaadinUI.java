@@ -10,6 +10,11 @@ import hu.bartl.backend.User;
 import hu.bartl.backend.User.ConversationListChangedEvent;
 import hu.bartl.backend.User.ConversationListChangedEventHandler;
 import hu.bartl.widgets.NewUserPopup;
+import hu.bartl.widgets.UserControlPanel;
+import hu.bartl.widgets.UserControlPanel.ConversationSelectionEvent;
+import hu.bartl.widgets.UserControlPanel.ConversationSelectionHandler;
+import hu.bartl.widgets.UserControlPanel.UserSelectionEvent;
+import hu.bartl.widgets.UserControlPanel.UserSelectionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +25,13 @@ import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
 import com.vaadin.shared.communication.PushMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.Window.CloseEvent;
 
@@ -51,13 +51,9 @@ public class MyVaadinUI extends UI {
 
 	private final NewUserPopup popup = new NewUserPopup();
 
+	private final UserControlPanel userControlPanel = new UserControlPanel();
+
 	private Component displayedComponent = new Panel();
-
-	private final Label userName = new Label();
-
-	private final ListSelect userList = new ListSelect();
-
-	private final ListSelect conversationList = new ListSelect();
 
 	private final HorizontalLayout layout = new HorizontalLayout();
 
@@ -69,8 +65,10 @@ public class MyVaadinUI extends UI {
 		backend.addUserListChangedEventHandler(new UserListChangedEventHandler() {
 			@Override
 			public void handleEvent(UserListChangedEvent event) {
-				userList.setContainerDataSource(backend.getUserContainer());
-				userList.markAsDirty();
+				userControlPanel.setUsers(backend.getUserContainer());
+				// userList.setContainerDataSource(backend.getUserContainer());
+				// userList.markAsDirty();
+				userControlPanel.markAsDirtyRecursive();
 				MyVaadinUI.this.pushSafely();
 			}
 		});
@@ -104,53 +102,25 @@ public class MyVaadinUI extends UI {
 
 	private void buildLayout() {
 
-		VerticalLayout listLayout = new VerticalLayout();
-		listLayout.addComponent(userName);
-		listLayout.addComponent(conversationList);
-		listLayout.addComponent(userList);
-		listLayout.setHeight(100, Unit.PERCENTAGE);
-		listLayout.setWidth(200, Unit.PIXELS);
+		userControlPanel.addUserSelectionHandler(new UserSelectionHandler() {
 
-		conversationList.setCaption("Beszélgetések");
-		conversationList.setHeight(100, Unit.PERCENTAGE);
-		conversationList.setWidth(200, Unit.PIXELS);
-		conversationList.setImmediate(true);
-		conversationList.setNullSelectionAllowed(true);
-
-		userList.setCaption("Felhasználók");
-		userList.setHeight(100, Unit.PERCENTAGE);
-		userList.setWidth(200, Unit.PIXELS);
-		userList.setContainerDataSource(backend.getUserContainer());
-		userList.setNullSelectionAllowed(true);
-		userList.setImmediate(true);
-		userList.addValueChangeListener(new ValueChangeListener() {
 			@Override
-			public void valueChange(ValueChangeEvent event) {
+			public void handle(UserSelectionEvent event) {
+				User selectedUser = backend.getUser(event.getUserName());
+				user.startConversation(selectedUser);
 
-				if (MyVaadinUI.this.user != null
-						&& event.getProperty().getValue() != null) {
-					String selectedUserName = event.getProperty().getValue() // TODO:
-																				// getValue
-																				// sometimes
-																				// gives
-																				// null
-							.toString();
-					user.startConversation(backend.getUser(selectedUserName));
-				}
 			}
 		});
 
-		listLayout.setExpandRatio(conversationList, 1);
-		listLayout.setExpandRatio(userList, 3);
-
-		layout.addComponent(listLayout);
-
+		userControlPanel.setWidth(UserControlPanel.WIDTH_PX_INT, Unit.PIXELS);
 		displayedComponent.setSizeFull();
+
+		layout.addComponent(userControlPanel);
 		layout.addComponent(displayedComponent);
 		layout.setExpandRatio(displayedComponent, 1);
-
 		layout.setMargin(true);
 		layout.setSizeFull();
+
 		setContent(layout);
 	}
 
@@ -163,10 +133,11 @@ public class MyVaadinUI extends UI {
 
 				@Override
 				public void windowClose(CloseEvent e) {
-					User newUser = User.create(userNameProperty.getValue());
+					String userName = userNameProperty.getValue();
+					User newUser = User.create(userName);
 					backend.addUser(newUser);
 					MyVaadinUI.this.user = newUser;
-					MyVaadinUI.this.userName.setValue(newUser.getName());
+					MyVaadinUI.this.userControlPanel.setUserName(userName);
 					MyVaadinUI.this.initializeConversationList();
 				}
 			});
@@ -183,43 +154,41 @@ public class MyVaadinUI extends UI {
 	}
 
 	private void setConverzationListDataSource() {
-		conversationList
-				.setContainerDataSource(user.getConversationContainer());
+		userControlPanel.setConversations(user.getConversationContainer());
 	}
 
 	private void addConversationSelectionHandling() {
-		conversationList.addValueChangeListener(new ValueChangeListener() {
+		userControlPanel
+				.addConversationSelectionHandler(new ConversationSelectionHandler() {
 
-			@Override
-			public void valueChange(ValueChangeEvent event) {
+					@Override
+					public void handle(ConversationSelectionEvent event) {
+						String selectedConversationName = event
+								.getConversationName();
+						final Conversation conversation = (Conversation) user
+								.getConversationContainer()
+								.getItem(selectedConversationName)
+								.getItemProperty("conversation").getValue();
 
-				if (event.getProperty().getValue() != null) {
-					String selectedUserName = event.getProperty().getValue()
-							.toString();
-					final Conversation conversation = (Conversation) user
-							.getConversationContainer()
-							.getItem(selectedUserName)
-							.getItemProperty("conversation").getValue();
+						if (!conversation.hasViewComponent(user)) {
+							conversation.attachViewComponentForUser(user);
+							conversation
+									.addMessageAddingListener(new MessageAddingListener() {
 
-					if (!conversation.hasViewComponent(user)) {
-						conversation.attachViewComponentForUser(user);
-						conversation
-								.addMessageAddingListener(new MessageAddingListener() {
+										@Override
+										public void handleEvent(
+												MessageAddedEvent event) {
+											MyVaadinUI.this.pushSafely();
+										}
+									});
+						}
 
-									@Override
-									public void handleEvent(
-											MessageAddedEvent event) {
-										MyVaadinUI.this.pushSafely();
-									}
-								});
+						MyVaadinUI.this.showComponent(conversation
+								.getViewComponent(user));
+
 					}
+				});
 
-					MyVaadinUI.this.showComponent(conversation
-							.getViewComponent(user));
-				}
-
-			}
-		});
 	}
 
 	private void addConversationRefreshHandling() {
@@ -227,8 +196,7 @@ public class MyVaadinUI extends UI {
 
 			@Override
 			public void handleEvent(ConversationListChangedEvent event) {
-				conversationList.setContainerDataSource(user
-						.getConversationContainer());
+				setConverzationListDataSource();
 				MyVaadinUI.this.pushSafely();
 			}
 		});
