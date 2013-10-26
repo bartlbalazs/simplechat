@@ -18,19 +18,23 @@ public class Conversation {
 	private final Map<User, ConversationPanel> conversationPanels = new HashMap<User, ConversationPanel>();
 	private final List<MessageAddingListener> listeners = new ArrayList<Conversation.MessageAddingListener>();
 
-	private Conversation(User user1, User user2) {
-		this.user1 = user1;
-		this.user2 = user2;
-		user1.notifyConversationStarted(this);
-		user2.notifyConversationStarted(this);
-	}
-
 	public static Conversation create(User user1, User user2) {
 		if (user1 != null && user2 != null && user1 != user2) {
 			return new Conversation(user1, user2);
 		} else {
 			throw new IllegalArgumentException();
 		}
+	}
+
+	private Conversation(User user1, User user2) {
+		this.user1 = user1;
+		this.user2 = user2;
+		start();
+	}
+
+	public void start() {
+		user1.notifyConversationStarted(this);
+		user2.notifyConversationStarted(this);
 	}
 
 	public void end() {
