@@ -1,8 +1,5 @@
 package hu.bartl.model;
 
-import hu.bartl.MyVaadinUI.UiCloseEvent;
-import hu.bartl.MyVaadinUI.UiCloseListener;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -15,7 +12,10 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 
-public class User implements UiCloseListener {
+public class User implements Serializable {
+
+	private static final long serialVersionUID = 2543621284115003770L;
+
 	private final String name;
 
 	private final Map<User, Conversation> conversations = new LinkedHashMap<User, Conversation>();
@@ -113,6 +113,7 @@ public class User implements UiCloseListener {
 			}
 		}
 
+		conversations.clear();
 		conversationListChangedEventHandlers.clear();
 	}
 
@@ -184,8 +185,8 @@ public class User implements UiCloseListener {
 				.getValue();
 	}
 
-	@Override
-	public void onUiClose(UiCloseEvent event) {
+	// TODO: maybe we should be more polite
+	public void kill() {
 		clearReferences();
 	}
 }

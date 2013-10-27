@@ -1,7 +1,5 @@
 package hu.bartl.backend;
 
-import hu.bartl.MyVaadinUI.UiCloseEvent;
-import hu.bartl.MyVaadinUI.UiCloseListener;
 import hu.bartl.model.User;
 
 import java.io.Serializable;
@@ -15,7 +13,7 @@ import com.vaadin.data.Container;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 
-public class Backend implements UiCloseListener, Serializable {
+public class Backend implements Serializable {
 
 	private static final long serialVersionUID = 3433634884328428300L;
 
@@ -39,13 +37,20 @@ public class Backend implements UiCloseListener, Serializable {
 
 	private final Map<String, User> users = new LinkedHashMap<String, User>();
 
-	public void addUser(User user) {
-		if (user != null) {
+	public boolean addUser(User user) {
+		if (user != null && !hasUserWithKey(user.getName())) {
 			users.put(user.getName(), user);
 			List<User> addedUsers = new ArrayList<User>();
 			addedUsers.add(user);
 			fireUserLisChangedEvent(addedUsers, new ArrayList<User>());
+			return true;
+		} else {
+			return false;
 		}
+	}
+
+	public boolean hasUserWithKey(String userKey) {
+		return users.containsKey(userKey);
 	}
 
 	public void removeUser(User user) {
@@ -121,10 +126,5 @@ public class Backend implements UiCloseListener, Serializable {
 
 	public interface UserListChangedEventHandler extends Serializable {
 		void handleEvent(UserListChangedEvent event);
-	}
-
-	@Override
-	public void onUiClose(UiCloseEvent event) {
-		removeUser(event.getAttachedUser());
 	}
 }
