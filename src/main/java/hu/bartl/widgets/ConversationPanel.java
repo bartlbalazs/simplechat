@@ -4,6 +4,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
@@ -47,9 +48,16 @@ public class ConversationPanel extends Panel {
 
 	private void buildInputLayout() {
 		inputLayout.setWidth(CONTENT_WIDTH_PX, Unit.PIXELS);
-		inputLayout.addComponent(sendButton);
 		inputLayout.addComponent(inputField);
+		inputLayout.addComponent(buildPlaceHolder(20));
+		inputLayout.addComponent(sendButton);
 		inputLayout.setExpandRatio(inputField, 1);
+	}
+
+	private Component buildPlaceHolder(int placeHolderWidthPx) {
+		Label placeHolder = new Label();
+		placeHolder.setWidth(placeHolderWidthPx, Unit.PIXELS);
+		return placeHolder;
 	}
 
 	private void buildSendButton() {
@@ -103,6 +111,7 @@ public class ConversationPanel extends Panel {
 
 		public MessageComponent(String sender, String content) {
 			this.addComponent(new Label(sender));
+			this.addComponent(buildPlaceHolder(10));
 			this.addComponent(new Label(content));
 		}
 	}
