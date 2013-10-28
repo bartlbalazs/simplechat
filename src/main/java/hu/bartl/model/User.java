@@ -54,39 +54,35 @@ public class User implements Serializable {
 	}
 
 	public void notifyConversationStarted(Conversation conversation) {
-		if (this.equals(conversation.getUser1())) {
-			if (!conversations.containsKey(conversation.getUser2())) {
-				conversations.put(conversation.getUser2(), conversation);
-				List<Conversation> startedConversations = new ArrayList<Conversation>();
+		if (conversation.getUser1().equals(this)
+				|| conversation.getUser2().equals(this)) {
+
+			User otherUser = conversation.getOtherUser(this);
+			if (!conversations.containsKey(otherUser)) {
+				conversations.put(otherUser, conversation);
+				List<Conversation> startedConversations = buildEmptyList();
 				startedConversations.add(conversation);
 				fireConversationLisChangedEvent(startedConversations,
-						new ArrayList<Conversation>());
-			}
-		}
-
-		if (this.equals(conversation.getUser2())) {
-			if (!conversations.containsKey(conversation.getUser1())) {
-				conversations.put(conversation.getUser1(), conversation);
-				List<Conversation> endedConversations = new ArrayList<Conversation>();
-				endedConversations.add(conversation);
-				fireConversationLisChangedEvent(new ArrayList<Conversation>(),
-						endedConversations);
+						buildEmptyList());
 			}
 		}
 	}
 
 	public void notifyConversationEnded(Conversation conversation) {
-		if (this.equals(conversation.getUser1())) {
-			if (conversations.containsKey(conversation.getUser2())) {
-				conversations.remove(conversation.getUser2());
-			}
+		User otherUser = conversation.getOtherUser(this);
+		if (conversations.containsKey(otherUser)) {
+			List<Conversation> startedConversations = buildEmptyList();
+			List<Conversation> endedConversations = buildEmptyList();
+			endedConversations.add(conversation);
+			conversations.remove(otherUser);
+			fireConversationLisChangedEvent(startedConversations,
+					endedConversations);
 		}
 
-		if (this.equals(conversation.getUser2())) {
-			if (conversations.containsKey(conversation.getUser1())) {
-				conversations.remove(conversation.getUser1());
-			}
-		}
+	}
+
+	private List<Conversation> buildEmptyList() {
+		return new ArrayList<Conversation>();
 	}
 
 	public void addConversationListChangedEventHandler(

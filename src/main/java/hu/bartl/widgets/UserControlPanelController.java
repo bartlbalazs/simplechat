@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.ui.Component;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.Notification.Type;
 
 public class UserControlPanelController implements Serializable {
 	private static final long serialVersionUID = 2620430098939630286L;
@@ -88,6 +90,7 @@ public class UserControlPanelController implements Serializable {
 		setConversationListDataSource();
 		addConversationSelectionHandling();
 		addConversationRefreshHandling();
+		addConversationNotificationBuilder();
 	}
 
 	private void setConversationListDataSource() {
@@ -140,6 +143,38 @@ public class UserControlPanelController implements Serializable {
 			public void handleEvent(ConversationListChangedEvent event) {
 				setConversationListDataSource();
 				fireUserEvent(UserEventType.CONVERSATION_LIST_CHANGED);
+			}
+		});
+	}
+
+	private void addConversationNotificationBuilder() {
+		user.addConversationListChangedEventHandler(new ConversationListChangedEventHandler() {
+			private static final long serialVersionUID = 5832540758360800189L;
+
+			@Override
+			public void handleEvent(ConversationListChangedEvent event) {
+				notifyStartedConversations(event.getStartedConversation());
+				notifyEndedConversations(event.getEndedConversation());
+			}
+
+			private void notifyStartedConversations(
+					List<Conversation> conversations) {
+				for (Conversation conversation : conversations) {
+					Notification.show(
+							"beszélgetés kezdődött: "
+									+ (conversation.getOtherUser(user))
+											.getName(), Type.TRAY_NOTIFICATION);
+				}
+			}
+
+			private void notifyEndedConversations(
+					List<Conversation> conversations) {
+				for (Conversation conversation : conversations) {
+					Notification.show(
+							"beszélgetés vége: "
+									+ (conversation.getOtherUser(user))
+											.getName(), Type.TRAY_NOTIFICATION);
+				}
 			}
 		});
 	}
