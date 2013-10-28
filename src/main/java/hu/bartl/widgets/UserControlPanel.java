@@ -73,12 +73,13 @@ public class UserControlPanel extends VerticalLayout {
 
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				String selectedConversationName = event.getProperty()
-						.getValue().toString();
-				ConversationSelectionEvent conversationSelectionEvent = new ConversationSelectionEvent(
-						selectedConversationName);
-				fireConversationSelectionEvent(conversationSelectionEvent);
-
+				if (event.getProperty().getValue() != null) {
+					String selectedConversationName = event.getProperty()
+							.getValue().toString();
+					ConversationSelectionEvent conversationSelectionEvent = new ConversationSelectionEvent(
+							selectedConversationName);
+					fireConversationSelectionEvent(conversationSelectionEvent);
+				}
 			}
 		});
 	}
@@ -90,11 +91,13 @@ public class UserControlPanel extends VerticalLayout {
 
 			@Override
 			public void valueChange(ValueChangeEvent event) {
-				String selectedUserName = event.getProperty().getValue()
-						.toString();
-				UserSelectionEvent userEvent = new UserSelectionEvent(
-						selectedUserName);
-				fireUserSelectionEvent(userEvent);
+				if (event.getProperty().getValue() != null) {
+					String selectedUserName = event.getProperty().getValue()
+							.toString();
+					UserSelectionEvent userEvent = new UserSelectionEvent(
+							selectedUserName);
+					fireUserSelectionEvent(userEvent);
+				}
 			}
 		});
 	}

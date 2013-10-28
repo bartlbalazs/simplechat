@@ -55,7 +55,7 @@ public class Backend implements Serializable {
 
 	public void removeUser(User user) {
 		if (users.containsKey(user.getName())) {
-			users.remove(user);
+			users.remove(user.getName());
 			List<User> removedUsers = new ArrayList<User>();
 			removedUsers.add(user);
 			fireUserLisChangedEvent(createNullList(), removedUsers);

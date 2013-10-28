@@ -44,6 +44,7 @@ public class UserLifeCycle implements Serializable {
 
 			@Override
 			public void detach(DetachEvent event) {
+				System.out.println(event.getConnector().getUI() + " detached");
 				logout();
 			}
 		});
@@ -75,27 +76,34 @@ public class UserLifeCycle implements Serializable {
 	}
 
 	public void logout() {
-		backend.removeUser(this.user);
 		user.kill();
+		backend.removeUser(this.user);
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
-		if (handler != null) {
-			this.eventHandlers.add(handler);
+		synchronized (eventHandlers) {
+			if (handler != null) {
+				this.eventHandlers.add(handler);
+			}
 		}
 	}
 
-	public void removeLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
-		if (this.eventHandlers.contains(handler)) {
-			this.eventHandlers.remove(handler);
+	public synchronized void removeLifeCycleEventHandler(
+			UserLifeCycleEventHandler handler) {
+		synchronized (eventHandlers) {
+			if (this.eventHandlers.contains(handler)) {
+				this.eventHandlers.remove(handler);
+			}
 		}
 	}
 
-	private void fireLifeCycleEvent(UserLifeCycleEventType type) {
+	private synchronized void fireLifeCycleEvent(UserLifeCycleEventType type) {
 		UserLifeCycleEvent event = new UserLifeCycleEvent(type);
-		for (UserLifeCycleEventHandler handler : eventHandlers) {
-			handler.handle(event);
+		synchronized (eventHandlers) {
+			for (UserLifeCycleEventHandler handler : eventHandlers) {
+				handler.handle(event);
+			}
 		}
 	}
 

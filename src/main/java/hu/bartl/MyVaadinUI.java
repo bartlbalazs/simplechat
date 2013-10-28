@@ -29,7 +29,7 @@ import com.vaadin.ui.UI;
 public class MyVaadinUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "hu.bartl.AppWidgetSet")
+	@VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "hu.bartl.AppWidgetSet", heartbeatInterval = 1, closeIdleSessions = true)
 	public static class Servlet extends VaadinServlet {
 	}
 
@@ -64,6 +64,11 @@ public class MyVaadinUI extends UI {
 
 				case LOGIN_FAILED:
 					lifeCycle.login();
+					break;
+
+				case LOGGED_OUT:
+					// lifeCycle.removeLifeCycleEventHandler(this); //TODO:
+					// solve the concurent modification problem
 					break;
 
 				default:
@@ -117,13 +122,16 @@ public class MyVaadinUI extends UI {
 	}
 
 	public void pushSafely() {
-		this.access(new Runnable() {
-			@Override
-			public void run() {
-				if (MyVaadinUI.this.isAttached()) {
-					MyVaadinUI.this.push();
+		if (this.isAttached()) {
+
+			this.access(new Runnable() {
+				@Override
+				public void run() {
+					if (MyVaadinUI.this.isAttached()) {
+						MyVaadinUI.this.push();
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 }
