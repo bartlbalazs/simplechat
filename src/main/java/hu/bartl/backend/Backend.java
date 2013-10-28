@@ -42,7 +42,7 @@ public class Backend implements Serializable {
 			users.put(user.getName(), user);
 			List<User> addedUsers = new ArrayList<User>();
 			addedUsers.add(user);
-			fireUserLisChangedEvent(addedUsers, new ArrayList<User>());
+			fireUserLisChangedEvent(addedUsers, createNullList());
 			return true;
 		} else {
 			return false;
@@ -58,8 +58,12 @@ public class Backend implements Serializable {
 			users.remove(user);
 			List<User> removedUsers = new ArrayList<User>();
 			removedUsers.add(user);
-			fireUserLisChangedEvent(new ArrayList<User>(), removedUsers);
+			fireUserLisChangedEvent(createNullList(), removedUsers);
 		}
+	}
+
+	private List<User> createNullList() {
+		return new ArrayList<User>();
 	}
 
 	public User getUser(String userName) {
