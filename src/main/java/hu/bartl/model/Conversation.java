@@ -14,6 +14,7 @@ import com.vaadin.data.Property.ValueChangeListener;
 public class Conversation {
 	private User user1;
 	private User user2;
+	private boolean isActive;
 	private final List<Message> messages = new ArrayList<Message>();
 	private final Map<User, ConversationPanel> conversationPanels = new HashMap<User, ConversationPanel>();
 	private final List<MessageAddingListener> listeners = new ArrayList<Conversation.MessageAddingListener>();
@@ -29,18 +30,21 @@ public class Conversation {
 	private Conversation(User user1, User user2) {
 		this.user1 = user1;
 		this.user2 = user2;
+		this.isActive = false;
 		start();
 	}
 
 	public void start() {
 		user1.notifyConversationStarted(this);
 		user2.notifyConversationStarted(this);
+		this.isActive = true;
 	}
 
 	public void end() {
 		user1.notifyConversationEnded(this);
 		user2.notifyConversationEnded(this);
 		clearReferences();
+		this.isActive = false;
 	}
 
 	public User getUser1() {
@@ -63,7 +67,7 @@ public class Conversation {
 	}
 
 	public void addMessage(Message message) {
-		if (message != null) {
+		if (isActive && message != null) {
 			this.messages.add(message);
 			for (Entry<User, ConversationPanel> panelEntry : conversationPanels
 					.entrySet()) {
