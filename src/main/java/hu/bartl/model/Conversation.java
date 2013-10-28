@@ -121,6 +121,14 @@ public class Conversation {
 		}
 	}
 
+	public User getOtherUser(User user) {
+		if (user.equals(user1) || user.equals(user2)) {
+			return (user1.equals(user)) ? user2 : user1;
+		} else {
+			return null;
+		}
+	}
+
 	public interface MessageAddingListener {
 		void handleEvent(MessageAddedEvent event);
 	}
