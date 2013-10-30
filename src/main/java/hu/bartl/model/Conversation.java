@@ -55,6 +55,10 @@ public class Conversation {
 		return user2;
 	}
 
+	public boolean isInvolved(User user) {
+		return (user1.equals(user) || user2.equals(user));
+	}
+
 	public List<Message> getMessages() {
 		return messages;
 	}

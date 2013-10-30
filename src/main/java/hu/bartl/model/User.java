@@ -54,9 +54,7 @@ public class User implements Serializable {
 	}
 
 	public void notifyConversationStarted(Conversation conversation) {
-		if (conversation.getUser1().equals(this)
-				|| conversation.getUser2().equals(this)) {
-
+		if (conversation.isInvolved(this)) {
 			User otherUser = conversation.getOtherUser(this);
 			if (!conversations.containsKey(otherUser)) {
 				conversations.put(otherUser, conversation);
