@@ -183,4 +183,9 @@ public class User implements Serializable {
 	public void kill() {
 		clearReferences();
 	}
+
+	@Override
+	public String toString() {
+		return "User [name=" + name + "]";
+	}
 }
