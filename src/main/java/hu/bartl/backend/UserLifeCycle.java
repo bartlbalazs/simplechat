@@ -31,6 +31,7 @@ public class UserLifeCycle implements Serializable {
 	private UserLifeCycle(UI ui) {
 		this.ui = ui;
 		this.backend = Backend.getInstance();
+
 		initialize();
 	}
 
@@ -79,31 +80,28 @@ public class UserLifeCycle implements Serializable {
 		user.kill();
 		backend.removeUser(this.user);
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
+
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
-		synchronized (eventHandlers) {
-			if (handler != null) {
-				this.eventHandlers.add(handler);
-			}
+		if (handler != null) {
+			this.eventHandlers.add(handler);
 		}
 	}
 
-	public synchronized void removeLifeCycleEventHandler(
-			UserLifeCycleEventHandler handler) {
-		synchronized (eventHandlers) {
-			if (this.eventHandlers.contains(handler)) {
-				this.eventHandlers.remove(handler);
-			}
+	public void removeLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
+		if (this.eventHandlers.contains(handler)) {
+			this.eventHandlers.remove(handler);
 		}
 	}
 
-	private synchronized void fireLifeCycleEvent(UserLifeCycleEventType type) {
+	private void fireLifeCycleEvent(UserLifeCycleEventType type) {
 		UserLifeCycleEvent event = new UserLifeCycleEvent(type);
-		synchronized (eventHandlers) {
-			for (UserLifeCycleEventHandler handler : eventHandlers) {
-				handler.handle(event);
-			}
+		List<UserLifeCycleEventHandler> handlers = new ArrayList<UserLifeCycle.UserLifeCycleEventHandler>(
+				eventHandlers);
+
+		for (UserLifeCycleEventHandler handler : handlers) {
+			handler.handle(event);
 		}
 	}
 
