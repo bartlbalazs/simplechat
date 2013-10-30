@@ -31,6 +31,7 @@ public class UserLifeCycle implements Serializable {
 	private UserLifeCycle(UI ui) {
 		this.ui = ui;
 		this.backend = Backend.getInstance();
+
 		initialize();
 	}
 
@@ -79,6 +80,7 @@ public class UserLifeCycle implements Serializable {
 		user.kill();
 		backend.removeUser(this.user);
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
+
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
