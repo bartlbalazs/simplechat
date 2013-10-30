@@ -67,8 +67,7 @@ public class MyVaadinUI extends UI {
 					break;
 
 				case LOGGED_OUT:
-					// lifeCycle.removeLifeCycleEventHandler(this); //TODO:
-					// solve the concurent modification problem
+					lifeCycle.removeLifeCycleEventHandler(this);
 					break;
 
 				default:
