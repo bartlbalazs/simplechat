@@ -77,10 +77,12 @@ public class UserLifeCycle implements Serializable {
 	}
 
 	public void logout() {
-		user.kill();
-		backend.removeUser(this.user);
+		if (user != null) {
+			user.kill();
+			backend.removeUser(this.user);
+			this.user = null;
+		}
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
-
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
