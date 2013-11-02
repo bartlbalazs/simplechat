@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -73,6 +74,7 @@ public abstract class OAuthButton extends Button {
 		this.apiSecret = apiSecret;
 		this.authListener = authListener;
 		super.addClickListener(new ClickListener() {
+			private static final long serialVersionUID = 7481852288820112363L;
 
 			@Override
 			public void buttonClick(ClickEvent event) {
@@ -125,12 +127,12 @@ public abstract class OAuthButton extends Button {
 	protected abstract String getJsonDataUrl();
 
 	/**
-	 * Gets the {@link User} implementation class for the user data that this
-	 * service provides.
+	 * Gets the {@link OAuthUser} implementation class for the user data that
+	 * this service provides.
 	 * 
-	 * @return {@link User} implementation class
+	 * @return {@link OAuthUser} implementation class
 	 */
-	protected abstract Class<? extends User> getUserClass();
+	protected abstract Class<? extends OAuthUser> getUserClass();
 
 	/**
 	 * Gets the OAuth service singleton.
@@ -167,6 +169,8 @@ public abstract class OAuthButton extends Button {
 	 */
 	protected RequestHandler createRequestHandler() {
 		return new RequestHandler() {
+			private static final long serialVersionUID = 3102955648855910068L;
+
 			@Override
 			public boolean handleRequest(VaadinSession session,
 					VaadinRequest request, VaadinResponse response)
@@ -174,49 +178,51 @@ public abstract class OAuthButton extends Button {
 
 				Map<String, String[]> parameters = request.getParameterMap();
 
-				if (parameters.containsKey(getVerifierName())) {
+				try {
 					String v = parameters.get(getVerifierName())[0];
 					Verifier verifier = new Verifier(v);
+
 					accessToken = service
 							.getAccessToken(requestToken, verifier);
 
-					User user = getUser();
+					OAuthUser user = getUser();
 
-					getSession().removeRequestHandler(handler);
+					if (getSession() != null) {
+						getSession().removeRequestHandler(handler);
+					}
 					handler = null;
-
 					authListener.userAuthenticated(user);
 
-					return false;
-
-				} else if (getFailureParameters() != null) {
-					for (String key : getFailureParameters()) {
-						if (parameters.containsKey(key)) {
-							authListener.failed(parameters.get(key)[0]);
-							break;
+				} catch (NullPointerException | OAuthException e) {
+					if (getFailureParameters() != null) {
+						for (String key : getFailureParameters()) {
+							if (parameters.containsKey(key)) {
+								authListener.failed(parameters.get(key)[0]);
+								break;
+							}
 						}
 					}
 				}
-
-				return false; // anyways, the request should go up so that the
-								// UI loads itself
+				return false;
 			}
 		};
+
 	}
 
 	/**
-	 * Creates and returns the {@link User} instance, usually by retreiving JSON
-	 * data from the url provided by {@link #getJsonDataUrl()}.
+	 * Creates and returns the {@link OAuthUser} instance, usually by retreiving
+	 * JSON data from the url provided by {@link #getJsonDataUrl()}.
 	 * 
-	 * @return the {@link User} instance containing user data from the service
+	 * @return the {@link OAuthUser} instance containing user data from the
+	 *         service
 	 */
-	protected User getUser() {
+	protected OAuthUser getUser() {
 		OAuthRequest request = new OAuthRequest(Verb.GET, getJsonDataUrl());
 		service.signRequest(accessToken, request);
 		Response response = request.send();
 
 		Gson gson = new Gson();
-		User user = gson.fromJson(response.getBody(), getUserClass());
+		OAuthUser user = gson.fromJson(response.getBody(), getUserClass());
 
 		// TODO set the token/secret here?
 		try {
@@ -241,11 +247,11 @@ public abstract class OAuthButton extends Button {
 	}
 
 	/**
-	 * Called when the {@link User} instance has been successfully created, or
-	 * the OAuth service returned a problem code.
+	 * Called when the {@link OAuthUser} instance has been successfully created,
+	 * or the OAuth service returned a problem code.
 	 */
 	public interface OAuthListener {
-		public void userAuthenticated(User user);
+		public void userAuthenticated(OAuthUser user);
 
 		public void failed(String reason);
 	}
@@ -256,12 +262,12 @@ public abstract class OAuthButton extends Button {
 	 * available trough the APIs.
 	 * <p>
 	 * The default {@link OAuthButton#getUser()} implementation sets the 'token'
-	 * and 'tokenSecret' member fields if such exist, so that the {@link User}
-	 * implementation can just return these in {@link #getToken()} and
-	 * {@link #getTokenSecret()}.
+	 * and 'tokenSecret' member fields if such exist, so that the
+	 * {@link OAuthUser} implementation can just return these in
+	 * {@link #getToken()} and {@link #getTokenSecret()}.
 	 * </p>
 	 */
-	public static interface User {
+	public static interface OAuthUser {
 
 		/**
 		 * Name of the OAuth service, e.g "facebook".
