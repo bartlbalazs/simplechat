@@ -34,6 +34,10 @@ public class User implements Serializable {
 		return oAuthUser.getId();
 	}
 
+	public String getPictureUrl() {
+		return oAuthUser.getPictureUrl();
+	}
+
 	public static User create(OAuthUser oAuthUser) {
 		if (oAuthUser != null) {
 			return new User(oAuthUser);

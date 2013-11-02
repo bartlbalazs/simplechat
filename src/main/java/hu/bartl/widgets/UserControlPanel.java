@@ -6,6 +6,8 @@ import java.util.List;
 import com.vaadin.data.Container;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.VerticalLayout;
@@ -20,9 +22,13 @@ public class UserControlPanel extends VerticalLayout {
 	private final List<UserSelectionHandler> userSelectionHandlers = new ArrayList<UserSelectionHandler>();
 	private final List<ConversationSelectionHandler> conversationSelectionHandlers = new ArrayList<ConversationSelectionHandler>();
 
-	private final Label userName = new Label();
+	private final VerticalLayout userLayout = new VerticalLayout();
 	private final ListSelect userList = new ListSelect();
 	private final ListSelect conversationList = new ListSelect();
+
+	private final Label userName = new Label();
+
+	private final Image userPicture = new Image();
 
 	public static UserControlPanel Create() {
 		return new UserControlPanel();
@@ -33,9 +39,17 @@ public class UserControlPanel extends VerticalLayout {
 	}
 
 	private void build() {
+		buildUserPanel();
 		buildConversationlist();
 		buildUserList();
 		buildMainLayout();
+	}
+
+	private void buildUserPanel() {
+		userPicture.setHeight(50, Unit.PIXELS);
+		userPicture.setWidth(50, Unit.PIXELS);
+		userLayout.addComponent(userPicture);
+		userLayout.addComponent(userName);
 	}
 
 	private void buildConversationlist() {
@@ -57,7 +71,7 @@ public class UserControlPanel extends VerticalLayout {
 	}
 
 	private void buildMainLayout() {
-		this.addComponent(userName);
+		this.addComponent(userLayout);
 		this.addComponent(conversationList);
 		this.addComponent(userList);
 		this.setExpandRatio(conversationList, 1);
@@ -104,6 +118,10 @@ public class UserControlPanel extends VerticalLayout {
 
 	public void setUserName(String userName) {
 		this.userName.setCaption(userName);
+	}
+
+	public void setUserPictureUrl(String pictureUrl) {
+		this.userPicture.setSource(new ExternalResource(pictureUrl));
 	}
 
 	public void setUsers(Container userContainer) {

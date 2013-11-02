@@ -64,9 +64,14 @@ public class UserControlPanelController implements Serializable {
 	}
 
 	private void initializeUserPanel() {
-		userControlPanel.setUserName(user.getName());
+		initializeUserInformations();
 		initializeUserList();
 		initializeConversationList();
+	}
+
+	private void initializeUserInformations() {
+		userControlPanel.setUserName(user.getName());
+		userControlPanel.setUserPictureUrl(user.getPictureUrl());
 	}
 
 	private void initializeUserList() {
