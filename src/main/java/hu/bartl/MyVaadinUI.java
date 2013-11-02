@@ -12,6 +12,7 @@ import hu.bartl.widgets.UserControlPanelController.UserEventType;
 
 import javax.servlet.annotation.WebServlet;
 
+import com.vaadin.annotations.PreserveOnRefresh;
 import com.vaadin.annotations.Push;
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
@@ -22,10 +23,12 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.UIDetachedException;
 
 @Theme("chattheme")
 @SuppressWarnings("serial")
 @Push(PushMode.MANUAL)
+@PreserveOnRefresh
 public class MyVaadinUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
@@ -121,16 +124,23 @@ public class MyVaadinUI extends UI {
 	}
 
 	public void pushSafely() {
-		if (this.isAttached()) {
-
-			this.access(new Runnable() {
-				@Override
-				public void run() {
-					if (MyVaadinUI.this.isAttached()) {
-						MyVaadinUI.this.push();
+		try {
+			if (this.isAttached()) {
+				this.access(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							if (MyVaadinUI.this.isAttached()) {
+								MyVaadinUI.this.push();
+							}
+						} catch (UIDetachedException e) {
+							System.out.println(e);
+						}
 					}
-				}
-			});
+				});
+			}
+		} catch (UIDetachedException e) {
+			System.out.println(e);
 		}
 	}
 }

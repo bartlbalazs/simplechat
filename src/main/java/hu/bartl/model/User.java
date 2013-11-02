@@ -1,5 +1,7 @@
 package hu.bartl.model;
 
+import hu.bartl.authentication.OAuthButton.OAuthUser;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,24 +18,25 @@ public class User implements Serializable {
 
 	private static final long serialVersionUID = 2543621284115003770L;
 
-	private final String name;
-
 	private final Map<User, Conversation> conversations = new LinkedHashMap<User, Conversation>();
-
 	private final List<ConversationListChangedEventHandler> conversationListChangedEventHandlers = new ArrayList<ConversationListChangedEventHandler>();
+	private final OAuthUser oAuthUser;
 
-	private User(String name) {
-		super();
-		this.name = name;
+	private User(OAuthUser oAuthUser) {
+		this.oAuthUser = oAuthUser;
 	}
 
 	public String getName() {
-		return name;
+		return oAuthUser.getName();
 	}
 
-	public static User create(String name) {
-		if (!Strings.isNullOrEmpty(name)) {
-			return new User(name);
+	public String getId() {
+		return oAuthUser.getId();
+	}
+
+	public static User create(OAuthUser oAuthUser) {
+		if (oAuthUser != null) {
+			return new User(oAuthUser);
 		} else {
 			throw new IllegalArgumentException();
 		}
@@ -186,6 +189,6 @@ public class User implements Serializable {
 
 	@Override
 	public String toString() {
-		return "User [name=" + name + "]";
+		return "User [name=" + getName() + "]";
 	}
 }

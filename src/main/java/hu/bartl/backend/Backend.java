@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Item;
@@ -19,6 +20,7 @@ public class Backend implements Serializable {
 
 	private static Backend instance = null;
 	private static Object mutex = new Object();
+	private final Logger logger = Logger.getLogger(Backend.class.getName());
 
 	private Backend() {
 	}
@@ -38,13 +40,15 @@ public class Backend implements Serializable {
 	private final Map<String, User> users = new LinkedHashMap<String, User>();
 
 	public boolean addUser(User user) {
-		if (user != null && !hasUserWithKey(user.getName())) {
-			users.put(user.getName(), user);
+		if (user != null && !hasUserWithKey(user.getId())) {
+			users.put(user.getId(), user);
 			List<User> addedUsers = new ArrayList<User>();
 			addedUsers.add(user);
 			fireUserLisChangedEvent(addedUsers, createNullList());
+			logger.info(user + " added successfully.");
 			return true;
 		} else {
+			logger.warning("failed to add user: " + user);
 			return false;
 		}
 	}
@@ -54,11 +58,12 @@ public class Backend implements Serializable {
 	}
 
 	public void removeUser(User user) {
-		if (users.containsKey(user.getName())) {
-			users.remove(user.getName());
+		if (user != null && users.containsKey(user.getId())) {
+			users.remove(user.getId());
 			List<User> removedUsers = new ArrayList<User>();
 			removedUsers.add(user);
 			fireUserLisChangedEvent(createNullList(), removedUsers);
+			logger.info(user + "removed");
 		}
 	}
 

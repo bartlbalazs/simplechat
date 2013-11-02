@@ -1,5 +1,7 @@
 package hu.bartl.backend;
 
+import hu.bartl.authentication.OAuthButton.OAuthListener;
+import hu.bartl.authentication.OAuthButton.OAuthUser;
 import hu.bartl.model.User;
 import hu.bartl.widgets.NewUserPopup;
 
@@ -7,19 +9,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.data.Property;
 import com.vaadin.server.ClientConnector.DetachEvent;
 import com.vaadin.server.ClientConnector.DetachListener;
 import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.Window.CloseEvent;
 
 public class UserLifeCycle implements Serializable {
 
 	private static final long serialVersionUID = -7957794884886185269L;
 
-	private final List<UserLifeCycleEventHandler> eventHandlers = new ArrayList<UserLifeCycleEventHandler>();
+	private static final String fbApiKey = "195337333982818";
+	private static final String fbApiSecret = "3379a6ba4a00349f1787483f1dcacfe6";
 
+	private final List<UserLifeCycleEventHandler> eventHandlers = new ArrayList<UserLifeCycleEventHandler>();
 	private final UI ui;
 	private final Backend backend;
 	private User user;
@@ -45,7 +46,6 @@ public class UserLifeCycle implements Serializable {
 
 			@Override
 			public void detach(DetachEvent event) {
-				System.out.println(event.getConnector().getUI() + " detached");
 				logout();
 			}
 		});
@@ -53,25 +53,26 @@ public class UserLifeCycle implements Serializable {
 
 	public void login() {
 		if (user == null) {
-			NewUserPopup popup = new NewUserPopup();
-			final Property<String> userNameProperty = popup.getDataSource();
-			popup.addCloseListener(new Window.CloseListener() {
-				private static final long serialVersionUID = -8803555429247162254L;
+			final NewUserPopup popup = new NewUserPopup(fbApiKey, fbApiSecret,
+					new OAuthListener() {
 
-				@Override
-				public void windowClose(CloseEvent e) {
+						@Override
+						public void userAuthenticated(OAuthUser user) {
+							User newUser = User.create(user);
+							if (backend.addUser(newUser)) {
+								UserLifeCycle.this.user = newUser;
+								fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_IN);
+							} else {
+								fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
+							}
+						}
 
-					String userName = userNameProperty.getValue();
-					User newUser = User.create(userName);
+						@Override
+						public void failed(String reason) {
+							fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
+						}
+					});
 
-					if (backend.addUser(newUser)) {
-						UserLifeCycle.this.user = newUser;
-						fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_IN);
-					} else {
-						fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
-					}
-				}
-			});
 			ui.addWindow(popup);
 		}
 	}

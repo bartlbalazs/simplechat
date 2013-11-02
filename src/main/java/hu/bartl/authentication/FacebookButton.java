@@ -12,7 +12,7 @@ public class FacebookButton extends OAuthButton {
 	/**
 	 * Creates a "Log in with Facebook" button that will use the given API
 	 * key/secret to authenticate the user with Facebook, and then call the
-	 * given callback with {@link User} details.
+	 * given callback with {@link OAuthUser} details.
 	 * 
 	 * @param apiKey
 	 *            API key from the service providing OAuth
@@ -29,7 +29,7 @@ public class FacebookButton extends OAuthButton {
 	/**
 	 * Creates a button with the given caption that will use the given API
 	 * key/secret to authenticate the user with Facebook, and then call the
-	 * given callback with {@link User} details.
+	 * given callback with {@link OAuthUser} details.
 	 * 
 	 * @param caption
 	 *            button caption
@@ -88,11 +88,11 @@ public class FacebookButton extends OAuthButton {
 	}
 
 	@Override
-	protected Class<? extends User> getUserClass() {
+	protected Class<? extends OAuthUser> getUserClass() {
 		return FacebookUser.class;
 	}
 
-	public static class FacebookUser implements User {
+	public static class FacebookUser implements OAuthUser {
 		@SerializedName("first_name")
 		private String firstName;
 		@SerializedName("last_name")
@@ -116,7 +116,7 @@ public class FacebookButton extends OAuthButton {
 
 		@Override
 		public String getName() {
-			return firstName + " " + lastName;
+			return lastName + " " + firstName;
 		}
 
 		@Override
