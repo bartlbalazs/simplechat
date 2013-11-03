@@ -2,6 +2,7 @@ package hu.bartl.backend;
 
 import hu.bartl.authentication.OAuthButton.OAuthListener;
 import hu.bartl.authentication.OAuthButton.OAuthUser;
+import hu.bartl.backend.Backend.UserAlreadyExistsException;
 import hu.bartl.model.User;
 import hu.bartl.widgets.NewUserPopup;
 
@@ -52,39 +53,38 @@ public class UserLifeCycle implements Serializable {
 	}
 
 	public void login() {
-		if (user == null) {
-			final NewUserPopup popup = new NewUserPopup(fbApiKey, fbApiSecret,
-					new OAuthListener() {
+		OAuthListener listener = new OAuthListener() {
 
-						@Override
-						public void userAuthenticated(OAuthUser user) {
-							User newUser = User.create(user.getId(),
-									user.getName(), user.getPictureUrl());
-							if (backend.addUser(newUser)) {
-								UserLifeCycle.this.user = newUser;
-								fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_IN);
-							} else {
-								fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
-							}
-						}
+			@Override
+			public void userAuthenticated(OAuthUser user) {
+				try {
+					backend.createUser(user.getId(), user.getName(),
+							user.getPictureUrl());
+					UserLifeCycle.this.user = backend.getUser(user.getId());
+					fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_IN);
+				} catch (IllegalArgumentException | UserAlreadyExistsException e) {
+					fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
+				}
+			}
 
-						@Override
-						public void failed(String reason) {
-							fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
-						}
-					});
+			@Override
+			public void failed(String reason) {
+				fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
+			}
+		};
 
-			ui.addWindow(popup);
-		}
+		NewUserPopup popup = new NewUserPopup(fbApiKey, fbApiSecret, listener);
+		ui.addWindow(popup);
 	}
 
 	public void logout() {
-		if (user != null) {
-			user.kill();
-			backend.removeUser(this.user);
-			this.user = null;
-		}
+		backend.destroyUser(user);
+		this.user = null;
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {

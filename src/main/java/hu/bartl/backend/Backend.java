@@ -39,36 +39,32 @@ public class Backend implements Serializable {
 
 	private final Map<String, User> users = new LinkedHashMap<String, User>();
 
-	public boolean addUser(User user) {
-		if (user != null && !hasUserWithKey(user.getId())) {
-			users.put(user.getId(), user);
-			List<User> addedUsers = new ArrayList<User>();
-			addedUsers.add(user);
-			fireUserLisChangedEvent(addedUsers, createNullList());
-			logger.info(user + " added successfully.");
-			return true;
-		} else {
-			logger.warning("failed to add user: " + user);
-			return false;
+	public void createUser(String id, String name, String pictureUrl)
+			throws IllegalArgumentException, UserAlreadyExistsException {
+		if (users.containsKey(id)) {
+			logger.warning("failed to create user: " + id + name + pictureUrl);
+			throw new UserAlreadyExistsException(id);
+		}
+		addUser(User.create(id, name, pictureUrl));
+	}
+
+	private void addUser(User user) {
+		users.put(user.getId(), user);
+		logger.info(user + " added successfully.");
+		fireUserAddedEvent(user);
+	}
+
+	public void destroyUser(User user) {
+		if (user != null) {
+			user.kill();
+			removeUser(user);
 		}
 	}
 
-	public boolean hasUserWithKey(String userKey) {
-		return users.containsKey(userKey);
-	}
-
-	public void removeUser(User user) {
-		if (user != null && users.containsKey(user.getId())) {
-			users.remove(user.getId());
-			List<User> removedUsers = new ArrayList<User>();
-			removedUsers.add(user);
-			fireUserLisChangedEvent(createNullList(), removedUsers);
-			logger.info(user + "removed");
-		}
-	}
-
-	private List<User> createNullList() {
-		return new ArrayList<User>();
+	private void removeUser(User user) {
+		users.remove(user.getId());
+		logger.info(user + "destroyed");
+		fireUserRemovedEvent(user);
 	}
 
 	public User getUser(String userName) {
@@ -87,10 +83,17 @@ public class Backend implements Serializable {
 		return userContainer;
 	}
 
-	private void fireUserLisChangedEvent(List<User> addedUsers,
-			List<User> removedUsers) {
-		UserListChangedEvent event = new UserListChangedEvent(addedUsers,
-				removedUsers);
+	private void fireUserAddedEvent(User user) {
+		fireUserLisChangedEvent(user, null);
+	}
+
+	private void fireUserRemovedEvent(User user) {
+		fireUserLisChangedEvent(null, user);
+	}
+
+	private void fireUserLisChangedEvent(User addedUser, User removedUser) {
+		UserListChangedEvent event = new UserListChangedEvent(addedUser,
+				removedUser);
 
 		for (UserListChangedEventHandler handler : this.userListChangedEventHandlers) {
 			handler.handleEvent(event);
@@ -114,26 +117,38 @@ public class Backend implements Serializable {
 
 	public class UserListChangedEvent implements Serializable {
 		private static final long serialVersionUID = -3777134377567604478L;
-		private final List<User> addedUsers;
-		private final List<User> removedUsers;
+		private final User addedUser;
+		private final User removedUser;
 
-		public UserListChangedEvent(List<User> addedUsers,
-				List<User> removedUsers) {
-			this.addedUsers = addedUsers;
-			this.removedUsers = removedUsers;
+		public UserListChangedEvent(User addedUser, User removedUser) {
+			this.addedUser = addedUser;
+			this.removedUser = removedUser;
 		}
 
-		public List<User> getAddedUsers() {
-			return addedUsers;
+		public User getAddedUsers() {
+			return addedUser;
 		}
 
-		public List<User> getRemovedUsers() {
-			return this.removedUsers;
+		public User getRemovedUsers() {
+			return this.removedUser;
 		}
 
 	}
 
 	public interface UserListChangedEventHandler extends Serializable {
 		void handleEvent(UserListChangedEvent event);
+	}
+
+	public class UserAlreadyExistsException extends Exception {
+		private static final long serialVersionUID = 1977103856457900816L;
+		private final String userId;
+
+		public UserAlreadyExistsException(String userId) {
+			this.userId = userId;
+		}
+
+		public String getUserId() {
+			return this.userId;
+		}
 	}
 }
