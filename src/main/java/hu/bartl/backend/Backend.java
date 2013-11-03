@@ -67,8 +67,8 @@ public class Backend implements Serializable {
 		fireUserRemovedEvent(user);
 	}
 
-	public User getUser(String userName) {
-		return users.get(userName);
+	public User getUser(String userId) {
+		return users.get(userId);
 	}
 
 	@SuppressWarnings("unchecked")
