@@ -58,7 +58,8 @@ public class UserLifeCycle implements Serializable {
 
 						@Override
 						public void userAuthenticated(OAuthUser user) {
-							User newUser = User.create(user);
+							User newUser = User.create(user.getId(),
+									user.getName(), user.getPictureUrl());
 							if (backend.addUser(newUser)) {
 								UserLifeCycle.this.user = newUser;
 								fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_IN);

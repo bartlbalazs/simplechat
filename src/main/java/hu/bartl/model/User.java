@@ -1,7 +1,5 @@
 package hu.bartl.model;
 
-import hu.bartl.authentication.OAuthButton.OAuthUser;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -20,27 +18,32 @@ public class User implements Serializable {
 
 	private final Map<User, Conversation> conversations = new LinkedHashMap<User, Conversation>();
 	private final List<ConversationListChangedEventHandler> conversationListChangedEventHandlers = new ArrayList<ConversationListChangedEventHandler>();
-	private final OAuthUser oAuthUser;
+	private final String id;
+	private final String name;
+	private final String pictureUrl;
 
-	private User(OAuthUser oAuthUser) {
-		this.oAuthUser = oAuthUser;
-	}
-
-	public String getName() {
-		return oAuthUser.getName();
+	private User(String id, String name, String pictureUrl) {
+		this.id = id;
+		this.name = name;
+		this.pictureUrl = pictureUrl;
 	}
 
 	public String getId() {
-		return oAuthUser.getId();
+		return this.id;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public String getPictureUrl() {
-		return oAuthUser.getPictureUrl();
+		return this.pictureUrl;
 	}
 
-	public static User create(OAuthUser oAuthUser) {
-		if (oAuthUser != null) {
-			return new User(oAuthUser);
+	public static User create(String id, String name, String pictureUrl) {
+		if (!Strings.isNullOrEmpty(id) && !Strings.isNullOrEmpty(name)
+				&& !Strings.isNullOrEmpty(pictureUrl)) {
+			return new User(id, name, pictureUrl);
 		} else {
 			throw new IllegalArgumentException();
 		}
