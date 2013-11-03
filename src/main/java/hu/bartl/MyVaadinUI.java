@@ -32,7 +32,7 @@ import com.vaadin.ui.UIDetachedException;
 public class MyVaadinUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "hu.bartl.AppWidgetSet", heartbeatInterval = 1, closeIdleSessions = true)
+	@VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "hu.bartl.AppWidgetSet", heartbeatInterval = 5, closeIdleSessions = true)
 	public static class Servlet extends VaadinServlet {
 	}
 
