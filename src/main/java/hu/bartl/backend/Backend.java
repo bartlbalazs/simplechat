@@ -39,10 +39,10 @@ public class Backend implements Serializable {
 
 	private final Map<String, User> users = new LinkedHashMap<String, User>();
 
-	public void createUser(String id, String name, String pictureUrl)
-			throws IllegalArgumentException, UserAlreadyExistsException {
+	public void createUser(String id, String name, String pictureUrl) {
 		if (users.containsKey(id)) {
-			logger.warning("failed to create user: " + id + name + pictureUrl);
+			logger.warning("failed to create user: " + id + " " + name + " "
+					+ pictureUrl);
 			throw new UserAlreadyExistsException(id);
 		}
 		addUser(User.create(id, name, pictureUrl));
@@ -139,7 +139,7 @@ public class Backend implements Serializable {
 		void handleEvent(UserListChangedEvent event);
 	}
 
-	public class UserAlreadyExistsException extends Exception {
+	public class UserAlreadyExistsException extends RuntimeException {
 		private static final long serialVersionUID = 1977103856457900816L;
 		private final String userId;
 
