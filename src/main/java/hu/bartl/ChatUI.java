@@ -29,10 +29,10 @@ import com.vaadin.ui.UIDetachedException;
 @SuppressWarnings("serial")
 @Push(PushMode.MANUAL)
 @PreserveOnRefresh
-public class MyVaadinUI extends UI {
+public class ChatUI extends UI {
 
 	@WebServlet(value = "/*", asyncSupported = true)
-	@VaadinServletConfiguration(productionMode = false, ui = MyVaadinUI.class, widgetset = "hu.bartl.AppWidgetSet", heartbeatInterval = 10, closeIdleSessions = true)
+	@VaadinServletConfiguration(productionMode = false, ui = ChatUI.class, widgetset = "hu.bartl.AppWidgetSet", heartbeatInterval = 10, closeIdleSessions = true)
 	public static class Servlet extends VaadinServlet {
 	}
 
@@ -94,7 +94,7 @@ public class MyVaadinUI extends UI {
 				if (event.getType().equals(UserEventType.CONVERSATION_SELECTED)) {
 					showComponent(event.getNewContent());
 				}
-				MyVaadinUI.this.pushSafely();
+				ChatUI.this.pushSafely();
 			}
 		});
 
@@ -130,8 +130,8 @@ public class MyVaadinUI extends UI {
 					@Override
 					public void run() {
 						try {
-							if (MyVaadinUI.this.isAttached()) {
-								MyVaadinUI.this.push();
+							if (ChatUI.this.isAttached()) {
+								ChatUI.this.push();
 							}
 						} catch (UIDetachedException e) {
 							System.out.println(e);
