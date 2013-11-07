@@ -50,11 +50,10 @@ public class User implements Serializable {
 	}
 
 	public void startConversation(User user) {
-		if (user != this) {
+		if (!this.equals(user)) {
 			Conversation newConversation = Conversation.create(this, user);
 			conversations.put(user, newConversation);
 		}
-
 	}
 
 	public void endConversation(User user) {
@@ -192,6 +191,22 @@ public class User implements Serializable {
 	// TODO: maybe we should be more polite
 	public void kill() {
 		clearReferences();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !(obj instanceof User)) {
+			return false;
+		}
+
+		if (this == obj) {
+			return true;
+		}
+
+		User user2 = (User) obj;
+
+		return id.equals(user2.getId()) && name.equals(user2.getName())
+				&& pictureUrl.equals(user2.pictureUrl);
 	}
 
 	@Override

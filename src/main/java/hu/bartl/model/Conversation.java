@@ -20,7 +20,7 @@ public class Conversation {
 	private final List<MessageAddingListener> listeners = new ArrayList<Conversation.MessageAddingListener>();
 
 	public static Conversation create(User user1, User user2) {
-		if (user1 != null && user2 != null && user1 != user2) {
+		if (user1 != null && user2 != null && !user1.equals(user2)) {
 			return new Conversation(user1, user2);
 		} else {
 			throw new IllegalArgumentException();

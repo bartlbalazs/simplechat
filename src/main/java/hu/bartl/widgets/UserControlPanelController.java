@@ -82,7 +82,6 @@ public class UserControlPanelController implements Serializable {
 			public void handle(UserSelectionEvent event) {
 				User selectedUser = backend.getUser(event.getUserName());
 				user.startConversation(selectedUser);
-
 			}
 		});
 	}

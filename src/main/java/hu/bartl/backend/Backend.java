@@ -41,9 +41,7 @@ public class Backend implements Serializable {
 
 	public void createUser(String id, String name, String pictureUrl) {
 		if (users.containsKey(id)) {
-			logger.warning("failed to create user: " + id + " " + name + " "
-					+ pictureUrl);
-			throw new UserAlreadyExistsException(id);
+			destroyUser(users.get(id));
 		}
 		addUser(User.create(id, name, pictureUrl));
 	}
