@@ -4,56 +4,37 @@ import hu.bartl.authentication.OAuthButton.OAuthListener;
 import hu.bartl.authentication.OAuthButton.OAuthUser;
 import hu.bartl.backend.Backend.UserAlreadyExistsException;
 import hu.bartl.model.User;
-import hu.bartl.widgets.NewUserPopup;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.vaadin.server.ClientConnector.DetachEvent;
-import com.vaadin.server.ClientConnector.DetachListener;
-import com.vaadin.ui.UI;
-
 public class UserLifeCycle implements Serializable {
 
 	private static final long serialVersionUID = -7957794884886185269L;
 
-	private static final String fbApiKey = "195337333982818";
-	private static final String fbApiSecret = "3379a6ba4a00349f1787483f1dcacfe6";
-
 	private final List<UserLifeCycleEventHandler> eventHandlers = new ArrayList<UserLifeCycleEventHandler>();
-	private final UI ui;
 	private final Backend backend;
 	private User user;
 
-	public static UserLifeCycle create(UI ui) {
-		return new UserLifeCycle(ui);
+	public static UserLifeCycle create() {
+		return new UserLifeCycle();
 	}
 
-	private UserLifeCycle(UI ui) {
-		this.ui = ui;
+	private UserLifeCycle() {
 		this.backend = Backend.getInstance();
-
-		initialize();
 	}
 
 	public User getUser() {
 		return this.user;
 	}
 
-	public void initialize() {
-		this.ui.addDetachListener(new DetachListener() {
-			private static final long serialVersionUID = -4320072406018854769L;
-
-			@Override
-			public void detach(DetachEvent event) {
-				logout();
-			}
-		});
+	public void login() {
+		fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_STARTED);
 	}
 
-	public void login() {
-		OAuthListener listener = new OAuthListener() {
+	public OAuthListener getAuthenticationListener() {
+		return new OAuthListener() {
 
 			@Override
 			public void userAuthenticated(OAuthUser user) {
@@ -72,19 +53,12 @@ public class UserLifeCycle implements Serializable {
 				fireLifeCycleEvent(UserLifeCycleEventType.LOGIN_FAILED);
 			}
 		};
-
-		NewUserPopup popup = new NewUserPopup(fbApiKey, fbApiSecret, listener);
-		ui.addWindow(popup);
 	}
 
 	public void logout() {
 		backend.destroyUser(user);
 		this.user = null;
 		fireLifeCycleEvent(UserLifeCycleEventType.LOGGED_OUT);
-	}
-
-	public void setUser(User user) {
-		this.user = user;
 	}
 
 	public void addLifeCycleEventHandler(UserLifeCycleEventHandler handler) {
@@ -122,7 +96,7 @@ public class UserLifeCycle implements Serializable {
 	}
 
 	public enum UserLifeCycleEventType {
-		LOGGED_IN, LOGIN_FAILED, LOGGED_OUT
+		LOGIN_STARTED, LOGGED_IN, LOGIN_FAILED, LOGGED_OUT
 	}
 
 	public interface UserLifeCycleEventHandler {
