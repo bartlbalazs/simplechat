@@ -1,0 +1,8 @@
+SceneTypes:
+    - title: Függetlenség napja
+      description: Jönnek az ufók!
+      maxActorCount: 6
+
+    - title: Zombi apokalipszis
+      description: Jönnek a zombik!
+      maxActorCount: 4
