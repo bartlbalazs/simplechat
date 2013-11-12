@@ -13,12 +13,11 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class SceneTypeProvider {
 
-	private static final String INPUT_FILE_PATH = "./src/main/resources/scenes.yaml";
 	private static final String INPUT_ROOT_ELEMENT = "SceneTypes";
 
-	public List<SceneType> getSceneTypes() {
+	public List<SceneType> getSceneTypes(File source) {
 		ObjectMapper mapper = createMapper();
-		return parseInput(mapper, INPUT_ROOT_ELEMENT);
+		return parseInput(source, mapper, INPUT_ROOT_ELEMENT);
 	}
 
 	private ObjectMapper createMapper() {
@@ -29,27 +28,22 @@ public class SceneTypeProvider {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<SceneType> parseInput(ObjectMapper mapper,
+	private List<SceneType> parseInput(File source, ObjectMapper mapper,
 			String rootElementName) {
 
 		try {
 			List<LinkedHashMap<String, ?>> rawSceneTypes;
-			rawSceneTypes = (List) ((Map) ((mapper.readValue(getInput(),
-					List.class)).get(0))).get(rootElementName);
+			rawSceneTypes = (List) ((Map) ((mapper
+					.readValue(source, List.class)).get(0)))
+					.get(rootElementName);
 			List<SceneType> sceneTypes = new ArrayList<>();
 			for (LinkedHashMap<String, ?> rawSceneType : rawSceneTypes) {
 				sceneTypes.add(mapper.convertValue(rawSceneType,
 						SceneType.class));
 			}
 			return sceneTypes;
-		} catch (IOException e) {
+		} catch (IOException | ClassCastException e) {
 			return new ArrayList<SceneType>();
 		}
 	}
-
-	private File getInput() {
-		File input = new File(INPUT_FILE_PATH);
-		return input;
-	}
-
 }
