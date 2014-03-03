@@ -24,7 +24,7 @@ public class SceneTypeProviderTest {
 	public void setup() {
 		try {
 			inputFile = File.createTempFile("test", ".yaml");
-			writer = new PrintWriter(inputFile);
+			writer = new PrintWriter(inputFile,"UTF-8");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
